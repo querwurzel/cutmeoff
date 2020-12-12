@@ -1,3 +1,12 @@
+body {
+background-color: #F0F8FF;
+background-image: url(/favicon.svg);
+background-repeat: no-repeat;
+background-size: 100vh;
+background-blend-mode: soft-light;
+background-position: 0 10%;
+}
+
 form {
 width:300px;
 margin:100px auto;

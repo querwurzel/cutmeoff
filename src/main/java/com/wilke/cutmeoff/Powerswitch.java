@@ -5,11 +5,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ApplicationContext;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -54,11 +57,16 @@ public class Powerswitch {
         out.flush();
     }
 
+    @Async
     @PostMapping
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
     protected void cutMeOff(HttpServletRequest request) {
         final String remoteAddr = request.getHeader("X-Forwarded-For");
         final String reverseProxy = request.getRemoteAddr();
-        log.info("{} cut me off.", remoteAddr == null ? reverseProxy : remoteAddr);
+        log.info("{} cut me off after {}h.",
+                remoteAddr == null ? reverseProxy : remoteAddr,
+                ChronoUnit.HOURS.between(uptime, Instant.now())
+        );
 
         SpringApplication.exit(applicationContext, () -> 0);
         System.exit(0);
