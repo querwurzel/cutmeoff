@@ -7,7 +7,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,6 +19,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Enumeration;
+import java.util.concurrent.Callable;
 
 @Controller
 @RequestMapping("/")
@@ -57,19 +58,26 @@ public class Powerswitch {
         out.flush();
     }
 
-    @Async
     @PostMapping
     @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
-    protected void cutMeOff(HttpServletRequest request) {
-        final String remoteAddr = request.getHeader("X-Forwarded-For");
-        final String reverseProxy = request.getRemoteAddr();
-        log.info("{} cut me off after {}h.",
-                remoteAddr == null ? reverseProxy : remoteAddr,
-                ChronoUnit.HOURS.between(uptime, Instant.now())
-        );
+    protected Callable<Void> cutMeOff(HttpServletRequest request) {
+        return () -> {
+            final String remoteAddr = request.getHeader("X-Forwarded-For");
+            final String reverseProxy = request.getRemoteAddr();
+            log.info("{} cut me off after {}h.",
+                    remoteAddr == null ? reverseProxy : remoteAddr,
+                    ChronoUnit.HOURS.between(uptime, Instant.now())
+            );
 
-        SpringApplication.exit(applicationContext, () -> 0);
-        System.exit(0);
+            final Enumeration<String> headerNames = request.getHeaderNames();
+            while (headerNames.hasMoreElements()) {
+                String header = headerNames.nextElement();
+                log.info("{}: {}", header, request.getHeader(header));
+            }
+
+            SpringApplication.exit(applicationContext, () -> 0);
+            System.exit(0);
+            return null;
+        };
     }
-
 }
