@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Enumeration;
-import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 
 @Controller
 @RequestMapping("/")
@@ -60,24 +60,23 @@ public class Powerswitch {
 
     @PostMapping
     @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
-    protected Callable<Void> cutMeOff(HttpServletRequest request) {
-        return () -> {
-            final String remoteAddr = request.getHeader("X-Forwarded-For");
-            final String reverseProxy = request.getRemoteAddr();
-            log.info("{} cut me off after {}h.",
-                    remoteAddr == null ? reverseProxy : remoteAddr,
-                    ChronoUnit.HOURS.between(uptime, Instant.now())
-            );
+    protected void cutMeOff(HttpServletRequest request) {
+        final String remoteAddr = request.getHeader("X-Forwarded-For");
+        final String reverseProxy = request.getRemoteAddr();
+        log.info("{} cut me off after {}h.",
+                remoteAddr == null ? reverseProxy : remoteAddr,
+                ChronoUnit.HOURS.between(uptime, Instant.now())
+        );
 
-            final Enumeration<String> headerNames = request.getHeaderNames();
-            while (headerNames.hasMoreElements()) {
-                String header = headerNames.nextElement();
-                log.info("{}: {}", header, request.getHeader(header));
-            }
+        final Enumeration<String> headerNames = request.getHeaderNames();
+        while (headerNames.hasMoreElements()) {
+            String header = headerNames.nextElement();
+            log.info("{}: {}", header, request.getHeader(header));
+        }
 
+        CompletableFuture.runAsync(() -> {
             SpringApplication.exit(applicationContext, () -> 0);
             System.exit(0);
-            return null;
-        };
+        });
     }
 }

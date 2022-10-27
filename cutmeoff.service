@@ -6,14 +6,12 @@ After=network.target remote-fs.target
 User=cutmeoff
 Group=cutmeoff
 PrivateTmp=true
-#PrivateUsers=true
-#ProtectHome=true
 ProtectSystem=full
 ProtectKernelTunables=true
 ProtectKernelModules=true
 ProtectControlGroups=true
-WorkingDirectory=/home/cutmeoff/
-ExecStart=/usr/local/jdk/bin/java -Xms64M -Xmx128M -Djava.net.preferIPv4Stack=true -jar /home/cutmeoff/cutmeoff.jar
+WorkingDirectory=/opt/cutmeoff/
+ExecStart=/usr/local/jdk/bin/java -Xms64M -Xmx128M -Djava.net.preferIPv4Stack=true -jar cutmeoff.jar
 
 Restart=on-success
 RestartSec=2s
