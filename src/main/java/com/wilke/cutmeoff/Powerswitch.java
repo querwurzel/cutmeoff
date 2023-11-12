@@ -21,6 +21,9 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Enumeration;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+
+import static java.util.concurrent.CompletableFuture.delayedExecutor;
 
 @Controller
 @RequestMapping("/")
@@ -77,6 +80,6 @@ public class Powerswitch {
         CompletableFuture.runAsync(() -> {
             SpringApplication.exit(applicationContext, () -> 0);
             System.exit(0);
-        });
+        }, delayedExecutor(200, TimeUnit.MILLISECONDS));
     }
 }
