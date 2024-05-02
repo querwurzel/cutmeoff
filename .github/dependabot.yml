@@ -11,6 +11,6 @@ updates:
     schedule:
       interval: "monthly"
     groups:
-      gradle:
+      maven:
         patterns:
           - "*"
