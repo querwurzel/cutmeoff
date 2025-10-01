@@ -6,7 +6,7 @@ No authorization, no resilience, no retry, no failovers, no no ..
 
 ### Requirements
 
-* JDK 17+
+* JDK 21+
 
 ### How to build
 
